@@ -35,7 +35,6 @@ private:
     uint _max_depth;
     uint _rr_depth;
     float _rr_threshold;
-    luisa::string _scheduler_type;
     uint _samples_per_pass;
     Scheduler _scheduler;
     WavefrontScheduler::Config _wavefront_config;
@@ -47,7 +46,6 @@ public:
           _max_depth{std::max(desc->property_uint_or_default("depth", 10u), 1u)},
           _rr_depth{std::max(desc->property_uint_or_default("rr_depth", 0u), 0u)},
           _rr_threshold{std::max(desc->property_float_or_default("rr_threshold", 0.95f), 0.05f)},
-          _scheduler_type{desc->property_string_or_default("scheduler_type", "wavefront")},
           _samples_per_pass{std::max(desc->property_uint_or_default("samples_per_pass", 16u), 1u)},
           _scheduler{[&] {
               auto s = desc->property_string_or_default(
@@ -88,7 +86,6 @@ public:
     [[nodiscard]] auto max_depth() const noexcept { return _max_depth; }
     [[nodiscard]] auto rr_depth() const noexcept { return _rr_depth; }
     [[nodiscard]] auto rr_threshold() const noexcept { return _rr_threshold; }
-    [[nodiscard]] auto scheduler_type() const noexcept { return _scheduler_type; }
     [[nodiscard]] auto samples_per_pass() const noexcept { return _samples_per_pass; }
     [[nodiscard]] luisa::string_view impl_type() const noexcept override { return LUISA_RENDER_PLUGIN_NAME; }
     [[nodiscard]] luisa::unique_ptr<Integrator::Instance> build(
@@ -272,11 +269,12 @@ protected:
 
             // evaluate material
             auto surface_tag = it->shape().surface_tag();
-            if (node<CoroutinePathTracing>()->scheduler_type() == "wavefront") {
-                $suspend("evaluate_surface", std::pair(surface_tag, "coro_hint"));
-            } else {
-                $suspend("evaluate_surface");
+            if (auto pt = node<CoroutinePathTracing>();
+                pt->scheduler() == CoroutinePathTracing::Scheduler::Wavefront &&
+                !pt->wavefront_config().hint_fields.empty()) {
+                $promise("coro_hint", surface_tag);
             }
+            $suspend("evaluate_surface");
             swl = sample_wl();
             auto wo = -ray->direction();
             auto u_lobe = sampler()->generate_1d();
