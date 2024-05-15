@@ -12,7 +12,7 @@
 	url = https://github.com/syoyo/tinyexr.git
 [submodule "src/compute"]
 	path = src/compute
-	url = https://github.com/LuisaGroup/LuisaCompute.git
+	url = https://github.com/LuisaGroup/LuisaCompute-coroutine.git
 	branch = next
 [submodule "src/ext/json"]
 	path = src/ext/json
