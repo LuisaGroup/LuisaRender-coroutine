@@ -194,7 +194,7 @@ protected:
                 auto ns = std::min<uint>(coro_pt->samples_per_pass(), s.spp - i);
                 command_buffer << (*scheduler)(s.point.time, s.point.weight, sample_id)
                                       .dispatch(resolution.x, resolution.y, ns);
-                sample_id += spp;
+                sample_id += ns;
                 camera->film()->show(command_buffer);
                 auto p = sample_id / static_cast<double>(spp);
                 command_buffer << [&progress, p] { progress.update(p); };
