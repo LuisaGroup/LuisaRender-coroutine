@@ -35,7 +35,7 @@ void dump_obj(MeshView m, uint level) noexcept {
 }
 
 int main() {
-    static_cast<void>(global_thread_pool());
+    static_cast<void>(render::global_thread_pool());
     for (auto i = 0u; i <= sphere_max_subdivision_level; i++) {
         Clock clk;
         auto future = SphereGeometry::create(i);
