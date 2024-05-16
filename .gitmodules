@@ -12,7 +12,7 @@
 	url = https://github.com/syoyo/tinyexr.git
 [submodule "src/compute"]
 	path = src/compute
-	url = https://github.com/LuisaGroup/LuisaCompute-coroutine.git
+	url = git@github.com:LuisaGroup/LuisaCompute-coroutine.git
 	branch = refactor-api
 [submodule "src/ext/json"]
 	path = src/ext/json
