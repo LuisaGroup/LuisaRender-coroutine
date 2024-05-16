@@ -23,13 +23,7 @@ public:
         Wavefront,
         Persistent,
     };
-
-#define PT_CORO_SIGNATURE float, float, uint
-    using SchedulerBase = coroutine::CoroScheduler<PT_CORO_SIGNATURE>;
-    using SimpleScheduler = coroutine::StateMachineCoroScheduler<PT_CORO_SIGNATURE>;
-    using WavefrontScheduler = coroutine::WavefrontCoroScheduler<PT_CORO_SIGNATURE>;
-    using PersistentScheduler = coroutine::PersistentThreadsCoroScheduler<PT_CORO_SIGNATURE>;
-#undef PT_CORO_SIGNATURE
+    using SchedulerBase = coroutine::CoroScheduler<float, float, uint>;
 
 private:
     uint _max_depth;
@@ -37,8 +31,8 @@ private:
     float _rr_threshold;
     uint _samples_per_pass;
     Scheduler _scheduler;
-    WavefrontScheduler::Config _wavefront_config;
-    PersistentScheduler::Config _persistent_config;
+    coroutine::WavefrontCoroSchedulerConfig _wavefront_config;
+    coroutine::PersistentThreadsCoroSchedulerConfig _persistent_config;
 
 public:
     CoroutinePathTracing(Scene *scene, const SceneNodeDesc *desc) noexcept
@@ -138,7 +132,8 @@ protected:
             auto &stream = *command_buffer.stream();
             switch (coro_pt->scheduler()) {
                 case CoroutinePathTracing::Scheduler::Simple: {
-                    return luisa::make_unique<CoroutinePathTracing::SimpleScheduler>(device, render);
+                    coroutine::StateMachineCoroScheduler s{device, render};
+                    return luisa::make_unique<decltype(s)>(std::move(s));
                 }
                 case CoroutinePathTracing::Scheduler::Wavefront: {
                     auto config = coro_pt->wavefront_config();
@@ -157,7 +152,8 @@ protected:
                                config.thread_count,
                                config.hint_range,
                                !config.hint_fields.empty() ? config.hint_fields[0] : "NULL");
-                    return luisa::make_unique<CoroutinePathTracing::WavefrontScheduler>(device, render, config);
+                    coroutine::WavefrontCoroScheduler s{device, render, config};
+                    return luisa::make_unique<decltype(s)>(std::move(s));
                 }
                 case CoroutinePathTracing::Scheduler::Persistent: {
                     auto config = coro_pt->persistent_config();
@@ -166,7 +162,8 @@ protected:
                                config.block_size,
                                config.fetch_size,
                                config.global_memory_ext);
-                    return luisa::make_unique<CoroutinePathTracing::PersistentScheduler>(device, render, config);
+                    coroutine::PersistentThreadsCoroScheduler s{device, render, config};
+                    return luisa::make_unique<decltype(s)>(std::move(s));
                 }
                 default:
                     break;
