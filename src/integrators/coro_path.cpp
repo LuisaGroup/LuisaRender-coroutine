@@ -44,7 +44,7 @@ public:
           _scheduler{[&] {
               auto s = desc->property_string_or_default(
                   "scheduler", luisa::lazy_construct([&] {
-                      return desc->property_string_or_default("scheduler_type", "wavefront");
+                      return desc->property_string("dispatcher");// for compatibility
                   }));
               for (auto &c : s) { c = static_cast<char>(std::tolower(c)); }
               if (s == "wavefront") { return Scheduler::Wavefront; }
