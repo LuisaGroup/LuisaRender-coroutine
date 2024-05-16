@@ -68,6 +68,7 @@ public:
                 if (desc->has_property("sort")) { _wavefront_config.gather_by_sorting = desc->property_bool("sort"); }
                 if (desc->has_property("compact")) { _wavefront_config.frame_buffer_compaction = desc->property_bool("compact"); }
                 if (desc->has_property("instances")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("instances"), 1_k); }
+                if (desc->has_property("threads")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("threads"), 1_k); }
                 if (desc->has_property("max_instance_count")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("max_instance_count"), 1_k); }
                 if (desc->has_property("sort_hints")) { _wavefront_config.hint_fields = desc->property_string_list_or_default("sort_hints"); }
                 break;
