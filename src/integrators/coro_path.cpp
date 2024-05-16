@@ -40,7 +40,7 @@ public:
           _max_depth{std::max(desc->property_uint_or_default("depth", 10u), 1u)},
           _rr_depth{std::max(desc->property_uint_or_default("rr_depth", 0u), 0u)},
           _rr_threshold{std::max(desc->property_float_or_default("rr_threshold", 0.95f), 0.05f)},
-          _samples_per_pass{std::max(desc->property_uint_or_default("samples_per_pass", 16u), 1u)},
+          _samples_per_pass{std::max(desc->property_uint_or_default("samples_per_pass", 64u), 1u)},
           _scheduler{[&] {
               auto s = desc->property_string_or_default(
                   "scheduler", luisa::lazy_construct([&] {
@@ -68,7 +68,13 @@ public:
                 break;
             }
             case Scheduler::Persistent: {
-                _persistent_config.shared_memory_soa = true;
+                _persistent_config = {
+                    .thread_count = 128_k,
+                    .block_size = 64,
+                    .fetch_size = 8,
+                    .shared_memory_soa = true,
+                    .global_memory_ext = true,
+                };
                 if (desc->has_property("max_thread_count")) { _persistent_config.thread_count = std::max<uint>(desc->property_uint("max_thread_count"), 5_k); }
                 if (desc->has_property("threads")) { _persistent_config.thread_count = std::max<uint>(desc->property_uint("threads"), 5_k); }
                 if (desc->has_property("block_size")) { _persistent_config.block_size = std::max<uint>(desc->property_uint("block_size"), 32u); }
