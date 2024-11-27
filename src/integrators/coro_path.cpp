@@ -40,11 +40,11 @@ public:
           _max_depth{std::max(desc->property_uint_or_default("depth", 10u), 1u)},
           _rr_depth{std::max(desc->property_uint_or_default("rr_depth", 0u), 0u)},
           _rr_threshold{std::max(desc->property_float_or_default("rr_threshold", 0.95f), 0.05f)},
-          _samples_per_pass{std::max(desc->property_uint_or_default("samples_per_pass", 16u), 1u)},
+          _samples_per_pass{std::max(desc->property_uint_or_default("samples_per_pass", 64u), 1u)},
           _scheduler{[&] {
               auto s = desc->property_string_or_default(
                   "scheduler", luisa::lazy_construct([&] {
-                      return desc->property_string_or_default("scheduler_type", "wavefront");
+                      return desc->property_string("dispatcher");// for compatibility
                   }));
               for (auto &c : s) { c = static_cast<char>(std::tolower(c)); }
               if (s == "wavefront") { return Scheduler::Wavefront; }
@@ -62,12 +62,19 @@ public:
                 if (desc->has_property("sort")) { _wavefront_config.gather_by_sorting = desc->property_bool("sort"); }
                 if (desc->has_property("compact")) { _wavefront_config.frame_buffer_compaction = desc->property_bool("compact"); }
                 if (desc->has_property("instances")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("instances"), 1_k); }
+                if (desc->has_property("threads")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("threads"), 1_k); }
                 if (desc->has_property("max_instance_count")) { _wavefront_config.thread_count = std::max<uint>(desc->property_uint("max_instance_count"), 1_k); }
                 if (desc->has_property("sort_hints")) { _wavefront_config.hint_fields = desc->property_string_list_or_default("sort_hints"); }
                 break;
             }
             case Scheduler::Persistent: {
-                _persistent_config.shared_memory_soa = true;
+                _persistent_config = {
+                    .thread_count = 128_k,
+                    .block_size = 64,
+                    .fetch_size = 8,
+                    .shared_memory_soa = true,
+                    .global_memory_ext = true,
+                };
                 if (desc->has_property("max_thread_count")) { _persistent_config.thread_count = std::max<uint>(desc->property_uint("max_thread_count"), 5_k); }
                 if (desc->has_property("threads")) { _persistent_config.thread_count = std::max<uint>(desc->property_uint("threads"), 5_k); }
                 if (desc->has_property("block_size")) { _persistent_config.block_size = std::max<uint>(desc->property_uint("block_size"), 32u); }
