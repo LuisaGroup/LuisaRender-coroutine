@@ -30,6 +30,15 @@ target_link_libraries(luisa-render-util PUBLIC
         luisa::compute
         luisa-render-include
         luisa-render-ext)
+
+# work around the clang bug: https://github.com/Homebrew/homebrew-core/issues/169820
+if (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
+        CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 18)
+    cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH CLANG_BIN_PATH)
+    cmake_path(GET CLANG_BIN_PATH PARENT_PATH CLANG_ROOT_PATH)
+    target_link_libraries(luisa-compute-core PUBLIC "-L${CLANG_ROOT_PATH}/lib/c++")
+endif ()
+
 set_target_properties(luisa-render-util PROPERTIES
         WINDOWS_EXPORT_ALL_SYMBOLS ON
         UNITY_BUILD ${LUISA_RENDER_ENABLE_UNITY_BUILD})
