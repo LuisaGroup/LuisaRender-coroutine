@@ -1,4 +1,13 @@
-# LuisaRender
+# LuisaRender (Coroutine Version, SIGGRAPH Asia 2024)
+
+This is the source code for the path tracing application described in the **SIGGRAPH Asia 2024** paper
+> [***GPU Coroutines for Flexible Splitting and Scheduling of Rendering Tasks***](https://doi.org/10.1145/3687766)
+
+For the underlying computing framework, LuisaCompute's coroutine version, please refer to [LuisaCompute-coroutine](https://github.com/LuisaGroup/LuisaCompute-coroutine).
+
+> ⚠️ Note: we have archived this repository as we are re-designing the IR layer for the main-stream LuisaCompute. The coroutine features will be re-implemented on that new IR in the future.
+
+# LuisaRender (Original Version, SIGGRAPH Asia 2022)
 
 LuisaRender is a high-performance cross-platform Monte-Carlo renderer for stream architectures based
 on [LuisaCompute](https://github.com/LuisaGroup/LuisaCompute).
